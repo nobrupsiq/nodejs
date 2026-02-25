@@ -1,43 +1,36 @@
 import { createServer } from "node:http";
 
-const frase1 = Promise.resolve("Olá");
-const frase2 = Promise.resolve("Mundo");
-const frasesPromisses = [frase1, frase2];
-const frases = [];
-
-for await (const frase of frasesPromisses) {
-  frases.push(frase);
-}
-
-const part1 = Buffer.from("Olá ");
-const part2 = Buffer.from("Mundo!");
-const final = Buffer.concat([part1, part2]);
-
 const server = createServer(async (req, res) => {
-  res.statusCode = 200;
-  res.setHeader("Content-Type", "text/plain; charset=utf-8");
   const url = new URL(req.url, "http://localhost");
-  const cor = url.searchParams.get("cor");
-  const tamanho = url.searchParams.get("tamanho");
-  // console.log(req.headers["content-type"]);
-  // console.log(req.rawHeaders);
+
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
   const chunks = [];
   for await (const chunk of req) {
     chunks.push(chunk);
   }
   const body = Buffer.concat(chunks).toString("utf-8");
-  console.log(JSON.parse(body));
 
   if (req.method === "GET" && url.pathname === "/") {
     res.statusCode = 200;
-    res.end("Home");
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.end(`
+        <html>
+          <head>
+            <title>Mundo</title>
+          </head>
+          <body>
+           <h1>Olá mundo</h1>
+          </body>
+        </html>
+      `);
   } else if (req.method === "POST" && url.pathname === "/produtos") {
     res.statusCode = 201;
-    res.end(`Produtos: ${cor}, ${tamanho}`);
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify({ nome: "Notebook" }));
   } else {
     res.statusCode = 404;
-    res.end("Não encontrada.");
+    res.end("Página não encontra.");
   }
   console.log(req.method);
 });
