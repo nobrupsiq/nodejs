@@ -1,12 +1,54 @@
-const response = await fetch("http://localhost:3000/produto?cor=vermelho", {
+const produtosResp = await fetch("http://localhost:3000/produtos");
+const produtos = await produtosResp.json();
+
+const response = await fetch("http://localhost:3000/produtos", {
   method: "POST",
-  // headers: {
-  //   'Content-Type': 'application/json',
-  // },
-  // body: JSON.stringify({ username: 'andre', password: '123456' }),
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    nome: "Notebook",
+    slug: "notebook",
+    categoria: "eletronicos",
+    preco: 4000,
+  }),
 });
 
-console.log(response);
+await fetch("http://localhost:3000/produtos", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    nome: "Computador",
+    slug: "computador",
+    categoria: "eletronicos",
+    preco: 6400,
+  }),
+});
 
-const body = await response.text();
-console.log(body);
+await fetch("http://localhost:3000/produtos", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    nome: "Mesa",
+    slug: "mesa",
+    categoria: "moveis",
+    preco: 1200,
+  }),
+});
+
+await fetch("http://localhost:3000/produtos", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    nome: "Mouse",
+    slug: "mouse",
+    categoria: "eletronicos",
+    preco: 500,
+  }),
+});
