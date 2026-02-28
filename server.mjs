@@ -2,60 +2,82 @@ import { createServer } from "node:http";
 import { Router } from "./router.mjs";
 import { customRequest } from "./custom-request.mjs";
 import { customResponse } from "./custom-response.mjs";
-import fs from "node:fs/promises";
+import {
+  criarCurso,
+  criarAula,
+  pegarCursos,
+  pegarCurso,
+  pegarAulas,
+  pegarAula,
+} from "./database.mjs";
 
 const router = new Router();
-const produtosDir = "produtos";
 
-router.post("/produtos", async (req, res) => {
-  const { categoria, slug } = req.body;
-  try {
-    await fs.mkdir(`./${produtosDir}/${categoria}`);
-  } catch {
-    console.log(`${categoria} Já criada.`);
-  }
-  try {
-    await fs.writeFile(
-      `./${produtosDir}/${categoria}/${slug}.json`,
-      JSON.stringify(req.body),
-      res.status(201).json(`${slug} criado.`),
-    );
-  } catch {
-    res.status(500).json("Erro.");
+// Criar cursos
+router.post("/cursos", (req, res) => {
+  const { slug, nome, descricao } = req.body;
+  const criado = criarCurso({ slug, nome, descricao });
+  if (criado) {
+    res.status(201).json("curso criado");
+  } else {
+    res.status(400).json("erro ao criar curso");
   }
 });
 
-router.get("/produtos", async (req, res) => {
-  try {
-    const listaArquivos = await fs.readdir(`${produtosDir}`, {
-      recursive: true,
-    });
-    const arquivosJson = listaArquivos.filter((item) => item.endsWith(".json"));
-    const promises = [];
-    for (const arquivo of arquivosJson) {
-      const conteudo = fs.readFile(`./${produtosDir}/${arquivo}`, "utf-8");
-      promises.push(conteudo);
-    }
-    const conteudos = await Promise.all(promises);
-    const produtos = conteudos.map(JSON.parse);
-    res.status(200).json(produtos);
-  } catch {
-    res.status(500).json("Erro.");
+// Criar aulas
+router.post("/aulas", (req, res) => {
+  const { slug, nome, cursoSlug } = req.body;
+  const criada = criarAula({ slug, nome, cursoSlug });
+  if (criada) {
+    res.status(201).json("Aula criada");
+  } else {
+    res.status(400).json("erro ao criar aula");
   }
 });
 
-router.get("/produto", async (req, res) => {
-  const categoria = req.query.get("categoria");
+//Visualiazr cursos
+router.get("/cursos", (req, res) => {
+  const cursos = pegarCursos();
+  if (cursos && cursos.length) {
+    res.status(200).json(cursos);
+  } else {
+    res.status(404).json("cursos não encontrado");
+  }
+  return;
+});
+
+// Visualizar apenas um curso especifico
+router.get("/curso", (req, res) => {
   const slug = req.query.get("slug");
-  try {
-    const conteudo = await fs.readFile(
-      `./${produtosDir}/${categoria}/${slug}.json`,
-      "utf-8",
-    );
-    const produto = JSON.parse(conteudo);
-    res.status(200).json(produto);
-  } catch {
-    res.status(404).json("Não encontrado.");
+  const curso = pegarCurso(slug);
+  if (curso) {
+    res.status(200).json(curso);
+  } else {
+    res.status(404).json("curso não encontrado");
+  }
+  return;
+});
+
+// Visualizar aulas
+router.get("/aulas", (req, res) => {
+  const curso = req.query.get("curso");
+  const aulas = pegarAulas(curso);
+  if (aulas && aulas.length) {
+    res.status(200).json(aulas);
+  } else {
+    res.status(404).json("aulas não encontradas");
+  }
+});
+
+// Visualizar aula
+router.get("/aula", (req, res) => {
+  const curso = req.query.get("curso");
+  const slug = req.query.get("slug");
+  const aula = pegarAula(curso, slug);
+  if (aula) {
+    res.status(200).json(aula);
+  } else {
+    res.status(404).json("aula não encontradas");
   }
 });
 

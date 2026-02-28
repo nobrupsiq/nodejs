@@ -1,54 +1,66 @@
-const produtosResp = await fetch("http://localhost:3000/produtos");
-const produtos = await produtosResp.json();
+const base = "http://localhost:3000";
 
-const response = await fetch("http://localhost:3000/produtos", {
+await fetch(base + "/cursos", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    nome: "Notebook",
-    slug: "notebook",
-    categoria: "eletronicos",
-    preco: 4000,
+    slug: "javascript",
+    nome: "JavaScript",
+    descricao: "Curso de JavaScript",
   }),
 });
 
-await fetch("http://localhost:3000/produtos", {
+await fetch(base + "/cursos", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    nome: "Computador",
-    slug: "computador",
-    categoria: "eletronicos",
-    preco: 6400,
+    slug: "html",
+    nome: "HTML",
+    descricao: "Curso de HTML",
   }),
 });
 
-await fetch("http://localhost:3000/produtos", {
+await fetch(base + "/aulas", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    nome: "Mesa",
-    slug: "mesa",
-    categoria: "moveis",
-    preco: 1200,
+    slug: "variaveis",
+    nome: "Variáveis",
+    cursoSlug: "javascript",
   }),
 });
 
-await fetch("http://localhost:3000/produtos", {
+await fetch(base + "/aulas", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    nome: "Mouse",
-    slug: "mouse",
-    categoria: "eletronicos",
-    preco: 500,
+    slug: "arrays",
+    nome: "Arrays",
+    cursoSlug: "javascript",
   }),
 });
+
+const aula = await fetch(base + "/aula?curso=javascript&slug=arrays").then(
+  (r) => r.json(),
+);
+console.log(aula);
+
+const aulas = await fetch(base + "/aulas?curso=javascript").then((r) =>
+  r.json(),
+);
+console.log(aulas);
+
+const curso = await fetch(base + "/curso?slug=html").then((r) => r.json());
+console.log(curso);
+
+const cursos = await fetch(base + "/cursos").then((r) => r.json());
+
+console.log(cursos);
