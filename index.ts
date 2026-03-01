@@ -1,7 +1,4 @@
-import { createServer } from "node:http";
-import { Router } from "./router.mjs";
-import { customRequest } from "./custom-request.mjs";
-import { customResponse } from "./custom-response.mjs";
+import { Core } from "./core/core.ts";
 import {
   criarCurso,
   criarAula,
@@ -9,12 +6,11 @@ import {
   pegarCurso,
   pegarAulas,
   pegarAula,
-} from "./database.mjs";
+} from "./core/database.ts";
 
-const router = new Router();
-
+const core = new Core();
 // Criar cursos
-router.post("/cursos", (req, res) => {
+core.router.post("/cursos", (req, res) => {
   const { slug, nome, descricao } = req.body;
   const criado = criarCurso({ slug, nome, descricao });
   if (criado) {
@@ -25,7 +21,7 @@ router.post("/cursos", (req, res) => {
 });
 
 // Criar aulas
-router.post("/aulas", (req, res) => {
+core.router.post("/aulas", (req, res) => {
   const { slug, nome, cursoSlug } = req.body;
   const criada = criarAula({ slug, nome, cursoSlug });
   if (criada) {
@@ -36,7 +32,7 @@ router.post("/aulas", (req, res) => {
 });
 
 //Visualiazr cursos
-router.get("/cursos", (req, res) => {
+core.router.get("/cursos", (req, res) => {
   const cursos = pegarCursos();
   if (cursos && cursos.length) {
     res.status(200).json(cursos);
@@ -47,7 +43,7 @@ router.get("/cursos", (req, res) => {
 });
 
 // Visualizar apenas um curso especifico
-router.get("/curso", (req, res) => {
+core.router.get("/curso", (req, res) => {
   const slug = req.query.get("slug");
   const curso = pegarCurso(slug);
   if (curso) {
@@ -59,7 +55,7 @@ router.get("/curso", (req, res) => {
 });
 
 // Visualizar aulas
-router.get("/aulas", (req, res) => {
+core.router.get("/aulas", (req, res) => {
   const curso = req.query.get("curso");
   const aulas = pegarAulas(curso);
   if (aulas && aulas.length) {
@@ -70,7 +66,7 @@ router.get("/aulas", (req, res) => {
 });
 
 // Visualizar aula
-router.get("/aula", (req, res) => {
+core.router.get("/aula", (req, res) => {
   const curso = req.query.get("curso");
   const slug = req.query.get("slug");
   const aula = pegarAula(curso, slug);
@@ -81,18 +77,8 @@ router.get("/aula", (req, res) => {
   }
 });
 
-const server = createServer(async (request, response) => {
-  const req = await customRequest(request);
-  const res = customResponse(response);
-
-  const handler = router.find(req.method, req.pathname);
-  if (handler) {
-    handler(req, res);
-  } else {
-    res.status(404).end("Não encontrada");
-  }
+core.router.get("/", (req, res) => {
+  res.status(200).end("hello");
 });
 
-server.listen(3000, () => {
-  console.log("Server: http://localhost:3000");
-});
+core.init();
