@@ -1,41 +1,64 @@
 import type { CustomRequest } from "./http/custom-request.ts";
 import type { CustomResponse } from "./http/custom-response.ts";
 
-type Handler = (
+export type Handler = (
   req: CustomRequest,
   res: CustomResponse,
 ) => Promise<void> | void;
 
+export type Middleware = (
+  req: CustomRequest,
+  res: CustomResponse,
+) => Promise<void> | void;
+
+type RouteDefinition = {
+  handler: Handler;
+  middleware: Middleware[];
+};
+
+type RoutesMiddleware = {
+  [methos: string]: {
+    [path: string]: {
+      handler: Handler;
+      middlewares: Middleware[];
+    };
+  };
+};
+
 type Routes = {
-  GET: Record<string, Handler>;
-  POST: Record<string, Handler>;
-  PUT: Record<string, Handler>;
-  DELETE: Record<string, Handler>;
-  HEAD: Record<string, Handler>;
+  GET: Record<string, RouteDefinition>;
+  POST: Record<string, RouteDefinition>;
+  PUT: Record<string, RouteDefinition>;
+  DELETE: Record<string, RouteDefinition>;
+  HEAD: Record<string, RouteDefinition>;
 };
 
 export class Router {
-  routes: Routes = {
+  routes: Routes | RoutesMiddleware = {
     GET: {},
     POST: {},
     PUT: {},
     DELETE: {},
     HEAD: {},
   };
-  get(route: string, handler: Handler) {
-    this.routes["GET"][route] = handler;
+  middlewares: Middleware[] = [];
+  get(route: string, handler: Handler, middleware: Middleware[] = []) {
+    this.routes["GET"][route] = { handler, middleware };
   }
-  post(route: string, handler: Handler) {
-    this.routes["POST"][route] = handler;
+  post(route: string, handler: Handler, middleware: Middleware[] = []) {
+    this.routes["POST"][route] = { handler, middleware };
   }
-  put(route: string, handler: Handler) {
-    this.routes["PUT"][route] = handler;
+  put(route: string, handler: Handler, middleware: Middleware[] = []) {
+    this.routes["PUT"][route] = { handler, middleware };
   }
-  delete(route: string, handler: Handler) {
-    this.routes["DELETE"][route] = handler;
+  delete(route: string, handler: Handler, middleware: Middleware[] = []) {
+    this.routes["DELETE"][route] = { handler, middleware };
   }
-  head(route: string, handler: Handler) {
-    this.routes["HEAD"][route] = handler;
+  head(route: string, handler: Handler, middleware: Middleware[] = []) {
+    this.routes["HEAD"][route] = { handler, middleware };
+  }
+  use(middleware: Middleware[]) {
+    this.middlewares.push(...middleware);
   }
   find(method: "GET" | "POST" | "PUT" | "DELETE" | "HEAD", pathname: string) {
     const routesByMethod = this.routes[method];
