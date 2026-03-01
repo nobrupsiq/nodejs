@@ -1,84 +1,28 @@
 import { Core } from "./core/core.ts";
-import {
-  criarCurso,
-  criarAula,
-  pegarCursos,
-  pegarCurso,
-  pegarAulas,
-  pegarAula,
-} from "./core/database.ts";
+import { pegarCurso } from "./core/database.ts";
 
 const core = new Core();
-// Criar cursos
-core.router.post("/cursos", (req, res) => {
-  const { slug, nome, descricao } = req.body;
-  const criado = criarCurso({ slug, nome, descricao });
-  if (criado) {
-    res.status(201).json("curso criado");
-  } else {
-    res.status(400).json("erro ao criar curso");
-  }
-});
 
-// Criar aulas
-core.router.post("/aulas", (req, res) => {
-  const { slug, nome, cursoSlug } = req.body;
-  const criada = criarAula({ slug, nome, cursoSlug });
-  if (criada) {
-    res.status(201).json("Aula criada");
-  } else {
-    res.status(400).json("erro ao criar aula");
-  }
-});
-
-//Visualiazr cursos
-core.router.get("/cursos", (req, res) => {
-  const cursos = pegarCursos();
-  if (cursos && cursos.length) {
-    res.status(200).json(cursos);
-  } else {
-    res.status(404).json("cursos não encontrado");
-  }
-  return;
-});
-
-// Visualizar apenas um curso especifico
-core.router.get("/curso", (req, res) => {
-  const slug = req.query.get("slug");
+core.router.get("/curso/:slug", (req, res) => {
+  const { slug } = req.params;
   const curso = pegarCurso(slug);
   if (curso) {
     res.status(200).json(curso);
   } else {
     res.status(404).json("curso não encontrado");
   }
-  return;
 });
 
-// Visualizar aulas
-core.router.get("/aulas", (req, res) => {
-  const curso = req.query.get("curso");
-  const aulas = pegarAulas(curso);
-  if (aulas && aulas.length) {
-    res.status(200).json(aulas);
-  } else {
-    res.status(404).json("aulas não encontradas");
-  }
+core.router.get("/aula/:aula", (req, res) => {
+  res.status(200).json("aula");
 });
 
-// Visualizar aula
-core.router.get("/aula", (req, res) => {
-  const curso = req.query.get("curso");
-  const slug = req.query.get("slug");
-  const aula = pegarAula(curso, slug);
-  if (aula) {
-    res.status(200).json(aula);
-  } else {
-    res.status(404).json("aula não encontradas");
-  }
+core.router.get("/aula/teste/:aula", (req, res) => {
+  res.status(200).json("aula");
 });
 
 core.router.get("/", (req, res) => {
-  res.status(200).end("hello");
+  res.status(200).json("ola");
 });
 
 core.init();

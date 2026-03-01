@@ -1,4 +1,4 @@
-import type { ServerResponse } from "node:http";
+import type { ServerResponse } from 'node:http';
 
 export interface CustomResponse extends ServerResponse {
   status(code: number): CustomResponse;
@@ -13,10 +13,10 @@ export function customResponse(response: ServerResponse) {
   };
   res.json = (data) => {
     try {
-      res.setHeader("Content-Type", "application/json");
+      res.setHeader('Content-Type', 'application/json');
       res.end(JSON.stringify(data));
     } catch {
-      res.status(500).end("error");
+      res.status(500).end('error');
     }
   };
   return res;
